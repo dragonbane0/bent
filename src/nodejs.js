@@ -9,12 +9,6 @@ const bent = require('./core')
 const zlib = require('zlib')
 const { PassThrough } = require('stream')
 
-const HttpAgent = require('agentkeepalive');
-const HttpsAgent = HttpAgent.HttpsAgent;
-
-const keepaliveAgentHttp = new HttpAgent();
-const keepaliveAgentHttps = new HttpsAgent();
-
 const compression = {}
 
 /* istanbul ignore else */
@@ -99,17 +93,14 @@ const decodings = res => {
   }
 }
 
-const mkrequest = (statusCodes, method, encoding, headers, baseurl) => (_url, body = null, _headers = {}) => {
+const mkrequest = (statusCodes, method, encoding, headers, baseurl) => (_url, body = null, _headers = {}, agent = undefined) => {
   _url = baseurl + (_url || '')
   const parsed = new URL(_url)
   let h
-  let agent
   if (parsed.protocol === 'https:') {
     h = https
-    agent = keepaliveAgentHttps;
   } else if (parsed.protocol === 'http:') {
     h = http
-    agent = keepaliveAgentHttp;
   } else {
     throw new Error(`Unknown protocol, ${parsed.protocol}`)
   }
